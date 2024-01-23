@@ -33,7 +33,7 @@ def fetch_poster(suggestion, final_rating):
     for book_id in suggestion:
         book_name.append(final_rating.index[book_id])
 
-    if book_name:
+    if book_name and book_name[0]:
         for name in book_name[0]:
             ids = np.where(final_rating['title'] == name)[0]
             if ids:
@@ -46,6 +46,7 @@ def fetch_poster(suggestion, final_rating):
         st.warning("No book recommendations found.")
 
     return poster_url
+
 
 def recommend_book(book_name, model, book_pivot, final_rating):
     books_list = []
