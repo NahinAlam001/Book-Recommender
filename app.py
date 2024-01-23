@@ -1,3 +1,4 @@
+import os
 import pickle
 import streamlit as st
 import numpy as np
@@ -47,7 +48,24 @@ def recommend_book(book_name, model, book_pivot, final_rating):
     return books_list, poster_url
 
 # Load data
-model, book_names, final_rating, book_pivot = load_data()
+def load_data():
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(base_path, 'artifacts', 'model.pkl')
+    book_names_path = os.path.join(base_path, 'artifacts', 'book_names.pkl')
+    final_rating_path = os.path.join(base_path, 'artifacts', 'final_rating.pkl')
+    book_pivot_path = os.path.join(base_path, 'artifacts', 'book_pivot.pkl')
+
+    try:
+        model = pickle.load(open(model_path, 'rb'))
+        book_names = pickle.load(open(book_names_path, 'rb'))
+        final_rating = pickle.load(open(final_rating_path, 'rb'))
+        book_pivot = pickle.load(open(book_pivot_path, 'rb'))
+    except FileNotFoundError as e:
+        st.error(f"Error loading file: {e}")
+        return None, None, None, None
+
+    return model, book_names, final_rating, book_pivot
+
 
 # Streamlit app
 st.header('Book Recommender System Using Machine Learning')
