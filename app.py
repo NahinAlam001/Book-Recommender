@@ -1,60 +1,56 @@
-'''
-Author: Nahin Alam
-Email: nahin.alam@northsouth.edu
-Date: 2024-Jan-07
-'''
-
 import pickle
 import streamlit as st
 import numpy as np
 
+def load_data():
+    try:
+        model = pickle.load(open('artifacts/model.pkl', 'rb'))
+        book_names = pickle.load(open('artifacts/book_names.pkl', 'rb'))
+        final_rating = pickle.load(open('artifacts/final_rating.pkl', 'rb'))
+        book_pivot = pickle.load(open('artifacts/book_pivot.pkl', 'rb'))
+    except FileNotFoundError as e:
+        st.error(f"Error loading file: {e}")
+        return None, None, None, None
 
-st.header('Book Recommender System Using Machine Learning')
-model = pickle.load(open('artifacts/model.pkl','rb'))
-book_names = pickle.load(open('artifacts/book_names.pkl','rb'))
-final_rating = pickle.load(open('artifacts/final_rating.pkl','rb'))
-book_pivot = pickle.load(open('artifacts/book_pivot.pkl','rb'))
+    return model, book_names, final_rating, book_pivot
 
-
-def fetch_poster(suggestion):
+def fetch_poster(suggestion, final_rating):
     book_name = []
     ids_index = []
     poster_url = []
 
     for book_id in suggestion:
-        book_name.append(book_pivot.index[book_id])
+        book_name.append(final_rating.index[book_id])
 
-    for name in book_name[0]: 
+    for name in book_name[0]:
         ids = np.where(final_rating['title'] == name)[0][0]
         ids_index.append(ids)
 
     for idx in ids_index:
-        # Check if 'img_url' is in the DataFrame columns
-        if 'img_url' in final_rating.columns:
-            url = final_rating.iloc[idx]['img_url']
-            poster_url.append(url)
-        else:
-            print("'img_url' not found in DataFrame")
-            poster_url.append('default_image.png')  # Placeholder image
+        url = final_rating.iloc[idx].get('img_url', 'default_image.png')
+        poster_url.append(url)
 
     return poster_url
 
-
-
-def recommend_book(book_name):
+def recommend_book(book_name, model, book_pivot, final_rating):
     books_list = []
     book_id = np.where(book_pivot.index == book_name)[0][0]
-    distance, suggestion = model.kneighbors(book_pivot.iloc[book_id,:].values.reshape(1,-1), n_neighbors=6 )
+    distance, suggestion = model.kneighbors(book_pivot.iloc[book_id, :].values.reshape(1, -1), n_neighbors=6)
 
-    poster_url = fetch_poster(suggestion)
-    
+    poster_url = fetch_poster(suggestion, final_rating)
+
     for i in range(len(suggestion)):
-            books = book_pivot.index[suggestion[i]]
-            for j in books:
-                books_list.append(j)
-    return books_list , poster_url       
+        books = book_pivot.index[suggestion[i]]
+        for j in books:
+            books_list.append(j)
 
+    return books_list, poster_url
 
+# Load data
+model, book_names, final_rating, book_pivot = load_data()
+
+# Streamlit app
+st.header('Book Recommender System Using Machine Learning')
 
 selected_books = st.selectbox(
     "Type or select a book from the dropdown",
@@ -62,7 +58,7 @@ selected_books = st.selectbox(
 )
 
 if st.button('Show Recommendation'):
-    recommended_books,poster_url = recommend_book(selected_books)
+    recommended_books, poster_url = recommend_book(selected_books, model, book_pivot, final_rating)
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
         st.text(recommended_books[1])
