@@ -4,14 +4,18 @@ import streamlit as st
 import numpy as np
 
 def load_data():
+    # Get the directory where this script is located
     base_path = os.path.dirname(os.path.abspath(__file__))
+
     model_path = os.path.join(base_path, 'artifacts', 'model.pkl')
     book_names_path = os.path.join(base_path, 'artifacts', 'book_names.pkl')
     final_rating_path = os.path.join(base_path, 'artifacts', 'final_rating.pkl')
     book_pivot_path = os.path.join(base_path, 'artifacts', 'book_pivot.pkl')
 
     try:
-        model = pickle.load(open(model_path, 'rb'))
+        with open(model_path, 'rb') as model_file:
+            model = pickle.load(model_file)
+
         book_names = pickle.load(open(book_names_path, 'rb'))
         final_rating = pickle.load(open(final_rating_path, 'rb'))
         book_pivot = pickle.load(open(book_pivot_path, 'rb'))
@@ -53,11 +57,11 @@ def recommend_book(book_name, model, book_pivot, final_rating):
 
     return books_list, poster_url
 
-# Load data
-model, book_names, final_rating, book_pivot = load_data()
-
 # Streamlit app
 st.header('Book Recommender System Using Machine Learning')
+
+# Load data
+model, book_names, final_rating, book_pivot = load_data()
 
 selected_books = st.selectbox(
     "Type or select a book from the dropdown",
