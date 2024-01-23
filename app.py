@@ -33,17 +33,18 @@ def fetch_poster(suggestion, final_rating):
     for book_id in suggestion:
         book_name.append(final_rating.index[book_id])
 
-    if book_name and book_name[0]:
-        for name in book_name[0]:
-            ids = np.where(final_rating['title'] == name)[0]
-            if ids:
-                ids_index.append(ids[0])
-
-        for idx in ids_index:
-            url = final_rating.iloc[idx].get('img_url', 'default_image.png')
-            poster_url.append(url)
-    else:
+    if book_name and book_name[0].empty:
         st.warning("No book recommendations found.")
+        return []
+
+    for name in book_name[0]:
+        ids = np.where(final_rating['title'] == name)[0]
+        if ids.size > 0:
+            ids_index.append(ids[0])
+
+    for idx in ids_index:
+        url = final_rating.iloc[idx].get('img_url', 'default_image.png')
+        poster_url.append(url)
 
     return poster_url
 
