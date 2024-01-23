@@ -40,14 +40,15 @@ def fetch_poster(suggestion, final_rating):
     for name in book_name[0]:
         ids = np.where(final_rating['title'] == name)[0]
         if ids.size > 0:
-            ids_index.append(ids[0])
+            idx = ids[0]
+            if 0 <= idx < len(final_rating):
+                ids_index.append(idx)
 
     for idx in ids_index:
         url = final_rating.iloc[idx].get('img_url', 'default_image.png')
         poster_url.append(url)
 
     return poster_url
-
 
 def recommend_book(book_name, model, book_pivot, final_rating):
     books_list = []
