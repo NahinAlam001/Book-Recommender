@@ -33,7 +33,7 @@ def fetch_poster(suggestion, final_rating):
     for book_id in suggestion:
         book_name.append(final_rating.index[book_id])
 
-    if book_name and book_name[0].empty:
+    if not book_name:
         st.warning("No book recommendations found.")
         return []
 
